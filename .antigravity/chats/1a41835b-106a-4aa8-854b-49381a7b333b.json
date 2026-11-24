@@ -28,6 +28,18 @@
       "created_at": "2026-11-24T09:04:31.297Z",
       "sender": "macOS",
       "is_cancelled": false
+    },
+    {
+      "id": "34e249fe-be49-48a4-92ee-26386c981256",
+      "role": "user",
+      "content": "I attached an image: .antigravity/uploads/photo-1795511680-e7b20a24.jpg.\n\ngame  2D nhập vai / chiến thuật chế tạo đồ và khai thác tài nguyên để chế giáp vũ khí và trang bị, có skill khi cấp khai thác lên 10lv max 100lv là có 10 skill 1 phần skill thụ động và 1 phần skill kích hoạt",
+      "status": "pending",
+      "model": "auto",
+      "client_type": "gemini-bridge",
+      "parent_message_id": null,
+      "created_at": "2026-11-24T09:14:42.162Z",
+      "sender": "ios",
+      "is_cancelled": false
     }
   ]
 }
