@@ -1,4 +1,4 @@
-import { RESOURCE_TYPES, MONSTER_TYPES, SKILLS, RECIPES } from './data.js';
+import { RAW_RESOURCES, MONSTER_TYPES, SKILLS, EQUIPMENT_RECIPES, TOOLS, FACTORY_PRODUCTS } from './data.js';
 
 export class FloatingText {
   constructor(x, y, text, color = '#ffffff', fontSize = 14, bold = false) {
@@ -65,12 +65,13 @@ export class Particle {
 }
 
 export class ResourceNode {
-  constructor(x, y, type) {
+  constructor(x, y, resId) {
     this.x = x;
     this.y = y;
-    this.type = type;
-    this.meta = RESOURCE_TYPES[type] || RESOURCE_TYPES.wood;
-    this.radius = type === 'wood' ? 18 : 16;
+    this.resId = resId;
+    this.meta = RAW_RESOURCES[resId] || RAW_RESOURCES.ore_1;
+    this.category = this.meta.type; // 'wood', 'ore', 'flora'
+    this.radius = this.category === 'wood' ? 20 : (this.category === 'flora' ? 14 : 17);
     this.maxHp = this.meta.hardness || 30;
     this.hp = this.maxHp;
     this.shake = 0;
@@ -84,8 +85,8 @@ export class ResourceNode {
     this.shake = 6;
     if (this.hp <= 0) {
       this.active = false;
-      this.respawnTimer = 18; // Respawns after 18 seconds
-      return true; // Node broken
+      this.respawnTimer = 16;
+      return true;
     }
     return false;
   }
@@ -108,57 +109,89 @@ export class ResourceNode {
 
     ctx.save();
     // Shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
     ctx.beginPath();
-    ctx.ellipse(sx, sy + this.radius * 0.7, this.radius * 0.9, this.radius * 0.45, 0, 0, Math.PI * 2);
+    ctx.ellipse(sx, sy + this.radius * 0.75, this.radius * 0.9, this.radius * 0.45, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    if (this.type === 'wood') {
-      // Tree trunk & leafy crown
-      ctx.fillStyle = '#6d4c41';
-      ctx.fillRect(sx - 4, sy - 2, 8, 14);
+    if (this.category === 'wood') {
+      // Warspear / Heartwood style tree
+      ctx.fillStyle = '#4e342e';
+      ctx.fillRect(sx - 5, sy - 2, 10, 16);
 
-      // Leaves
-      ctx.fillStyle = '#2e7d32';
-      ctx.beginPath();
-      ctx.arc(sx, sy - 8, this.radius, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#388e3c';
-      ctx.beginPath();
-      ctx.arc(sx - 3, sy - 11, this.radius * 0.7, 0, Math.PI * 2);
-      ctx.fill();
-    } else {
-      // Mineral Rock
+      // Leaves crown
       ctx.fillStyle = this.meta.color;
       ctx.beginPath();
-      ctx.moveTo(sx - this.radius, sy + this.radius * 0.5);
-      ctx.lineTo(sx - this.radius * 0.7, sy - this.radius * 0.6);
+      ctx.arc(sx, sy - 10, this.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#00000044';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Highlight inner leaf
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+      ctx.beginPath();
+      ctx.arc(sx - 3, sy - 13, this.radius * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (this.category === 'flora') {
+      // Cotton / Flower shrub
+      ctx.fillStyle = '#2e7d32';
+      ctx.beginPath();
+      ctx.arc(sx, sy, this.radius * 0.7, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Flower petals / Cotton puffs
+      ctx.fillStyle = this.meta.color;
+      ctx.beginPath();
+      ctx.arc(sx, sy - 5, this.radius * 0.5, 0, Math.PI * 2);
+      ctx.arc(sx - 6, sy - 2, this.radius * 0.4, 0, Math.PI * 2);
+      ctx.arc(sx + 6, sy - 2, this.radius * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff66';
+      ctx.stroke();
+    } else {
+      // Ore / Mineral Rock
+      ctx.fillStyle = this.meta.color;
+      ctx.beginPath();
+      ctx.moveTo(sx - this.radius, sy + this.radius * 0.6);
+      ctx.lineTo(sx - this.radius * 0.8, sy - this.radius * 0.5);
       ctx.lineTo(sx, sy - this.radius * 0.9);
-      ctx.lineTo(sx + this.radius * 0.8, sy - this.radius * 0.5);
+      ctx.lineTo(sx + this.radius * 0.8, sy - this.radius * 0.4);
       ctx.lineTo(sx + this.radius, sy + this.radius * 0.6);
       ctx.closePath();
       ctx.fill();
-      ctx.strokeStyle = '#ffffff22';
+      ctx.strokeStyle = '#ffffff33';
       ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Gem/mineral sparkle facets
+      // Shiny facet
       ctx.fillStyle = '#ffffffaa';
       ctx.beginPath();
-      ctx.arc(sx - 2, sy - 4, 3, 0, Math.PI * 2);
+      ctx.arc(sx - 3, sy - 4, 3, 0, Math.PI * 2);
       ctx.fill();
     }
 
+    // Level tag over node (Warspear/Heartwood MMO style)
+    ctx.fillStyle = 'rgba(10, 15, 20, 0.85)';
+    ctx.fillRect(sx - 24, sy - this.radius - 22, 48, 14);
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(sx - 24, sy - this.radius - 22, 48, 14);
+
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`Lv ${this.meta.reqLv}`, sx, sy - this.radius - 12);
+
     // Health bar if damaged
     if (this.hp < this.maxHp) {
-      const barW = 28;
+      const barW = 30;
       const barH = 4;
       const pct = Math.max(0, this.hp / this.maxHp);
       ctx.fillStyle = '#222222';
-      ctx.fillRect(sx - barW / 2, sy - this.radius - 10, barW, barH);
+      ctx.fillRect(sx - barW / 2, sy - this.radius - 7, barW, barH);
       ctx.fillStyle = '#00e676';
-      ctx.fillRect(sx - barW / 2, sy - this.radius - 10, barW * pct, barH);
+      ctx.fillRect(sx - barW / 2, sy - this.radius - 7, barW * pct, barH);
     }
 
     ctx.restore();
@@ -172,7 +205,7 @@ export class Monster {
     this.spawnX = x;
     this.spawnY = y;
     this.typeId = typeId;
-    this.meta = MONSTER_TYPES[typeId] || MONSTER_TYPES.slime;
+    this.meta = MONSTER_TYPES[typeId] || MONSTER_TYPES.wolf;
     this.hp = this.meta.hp;
     this.maxHp = this.meta.hp;
     this.atk = this.meta.atk;
@@ -196,16 +229,13 @@ export class Monster {
     const dy = player.y - this.y;
     const dist = Math.hypot(dx, dy);
 
-    // Aggro distance
-    const aggroRange = this.isBoss ? 450 : 250;
+    const aggroRange = this.isBoss ? 500 : 260;
 
     if (dist < aggroRange) {
-      // Chase player
       const angle = Math.atan2(dy, dx);
       this.vx = Math.cos(angle) * this.speed * 60 * dt;
       this.vy = Math.sin(angle) * this.speed * 60 * dt;
 
-      // Attack if in contact
       if (dist < this.radius + player.radius) {
         if (this.attackCooldown <= 0) {
           player.takeDamage(this.atk);
@@ -213,7 +243,6 @@ export class Monster {
         }
       }
     } else {
-      // Wandering patrol
       this.patrolTimer -= dt;
       if (this.patrolTimer <= 0) {
         this.patrolAngle = Math.random() * Math.PI * 2;
@@ -243,7 +272,7 @@ export class Monster {
 
     ctx.save();
     // Shadow
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
     ctx.beginPath();
     ctx.ellipse(sx, sy + this.radius * 0.8, this.radius * 0.9, this.radius * 0.4, 0, 0, Math.PI * 2);
     ctx.fill();
@@ -253,6 +282,9 @@ export class Monster {
     ctx.beginPath();
     ctx.arc(sx, sy, this.radius, 0, Math.PI * 2);
     ctx.fill();
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
 
     // Eyes
     ctx.fillStyle = '#ffffff';
@@ -261,25 +293,17 @@ export class Monster {
     ctx.arc(sx + this.radius * 0.3, sy - this.radius * 0.2, this.radius * 0.25, 0, Math.PI * 2);
     ctx.fill();
 
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = '#b71c1c';
     ctx.beginPath();
     ctx.arc(sx - this.radius * 0.25, sy - this.radius * 0.2, this.radius * 0.12, 0, Math.PI * 2);
     ctx.arc(sx + this.radius * 0.35, sy - this.radius * 0.2, this.radius * 0.12, 0, Math.PI * 2);
     ctx.fill();
 
-    // Boss Crown / Aura
-    if (this.isBoss) {
-      ctx.strokeStyle = '#ffd700';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(sx, sy, this.radius + 6, 0, Math.PI * 2);
-      ctx.stroke();
-
-      ctx.fillStyle = '#ffd700';
-      ctx.font = 'bold 16px sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText('👑 TITAN BOSS', sx, sy - this.radius - 12);
-    }
+    // Name tag & Boss Crown
+    ctx.fillStyle = this.isBoss ? '#ffd700' : '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(this.meta.name, sx, sy - this.radius - 12);
 
     // HP Bar
     const barW = this.radius * 2.2;
@@ -287,7 +311,7 @@ export class Monster {
     const pct = Math.max(0, this.hp / this.maxHp);
     ctx.fillStyle = '#222222';
     ctx.fillRect(sx - barW / 2, sy - this.radius - 8, barW, barH);
-    ctx.fillStyle = this.isBoss ? '#d50000' : '#ff5252';
+    ctx.fillStyle = this.isBoss ? '#ffd700' : '#ff5252';
     ctx.fillRect(sx - barW / 2, sy - this.radius - 8, barW * pct, barH);
 
     ctx.restore();
@@ -311,25 +335,34 @@ export class Player {
     this.miningExp = 0;
     this.miningExpNeeded = this.calcExpNeeded(1);
 
-    // Inventory & Equipment
+    // Inventory of raw & factory processed items
     this.inventory = {
-      wood: 20,
-      stone: 15,
-      iron: 0,
-      gold: 0,
-      diamond: 0,
-      obsidian: 0,
-      mythril: 0,
-      monster_leather: 2,
-      golem_core: 0,
-      titan_shard: 0
+      wood_1: 25,
+      ore_1: 20,
+      flora_1: 15,
+      pelt_1: 6,
+      ingot_copper: 5,
+      ingot_iron: 4,
+      plate_iron: 2,
+      pipe_steel: 2,
+      fabric_rough: 4
     };
 
+    // 5 Character Equipment Slots (Warspear / Heartwood style)
     this.equipment = {
       weapon: null,
+      helmet: null,
       armor: null,
-      shield: null,
-      tool: 'tool_stone_pick' // Start with basic pickaxe
+      pants: null,
+      boots: null
+    };
+
+    // 4 Specialized Gathering Tools (with Level Requirements)
+    this.tools = {
+      axe: 'axe_1',       // Lv 1
+      pickaxe: 'pickaxe_1', // Lv 1
+      knife: 'knife_1',   // Lv 1
+      sickle: 'sickle_1'  // Lv 1
     };
 
     // Skill cooldowns & active buffs
@@ -339,21 +372,19 @@ export class Player {
     });
 
     this.activeBuffs = {
-      berserk: 0, // Level 40 skill
-      whirlwind: 0, // Level 60 skill
-      titan: 0 // Level 100 skill
+      berserk: 0,
+      whirlwind: 0,
+      titan: 0
     };
 
     this.swingAngle = 0;
     this.isSwinging = false;
     this.swingTimer = 0;
-    this.facing = 1; // 1 for right, -1 for left
+    this.facing = 1;
 
     this.stats = {
       atk: 10,
       def: 0,
-      minePower: 15,
-      mineSpeed: 1.0,
       crit: 0.05
     };
 
@@ -361,16 +392,27 @@ export class Player {
   }
 
   calcExpNeeded(lvl) {
-    // Formula: Scales smoothly up to level 100
     return Math.floor(60 * Math.pow(lvl, 1.45));
+  }
+
+  getToolLevel(toolCategory) {
+    const toolId = this.tools[toolCategory];
+    if (!toolId) return 1;
+    const tool = TOOLS[toolId];
+    return tool ? tool.reqLv : 1;
+  }
+
+  getToolPower(toolCategory) {
+    const toolId = this.tools[toolCategory];
+    if (!toolId) return 15;
+    const tool = TOOLS[toolId];
+    return tool ? tool.power : 15;
   }
 
   recalculateStats() {
     let bonusHp = 0;
     let bonusDef = 0;
     let bonusAtk = 10;
-    let bonusMinePower = 10;
-    let bonusMineSpeed = 1.0;
     let bonusSpeed = 0;
     let bonusCrit = 0.05;
 
@@ -380,11 +422,11 @@ export class Player {
       bonusSpeed += 0.25;
     }
 
-    // Equipment bonuses
-    for (const slot of ['weapon', 'armor', 'shield', 'tool']) {
+    // Equipment bonuses across all 5 slots
+    for (const slot of ['weapon', 'helmet', 'armor', 'pants', 'boots']) {
       const eqId = this.equipment[slot];
       if (!eqId) continue;
-      const recipe = RECIPES.find(r => r.id === eqId);
+      const recipe = EQUIPMENT_RECIPES.find(r => r.id === eqId);
       if (!recipe) continue;
 
       let mult = 1.0;
@@ -395,19 +437,12 @@ export class Player {
       if (recipe.stats.def) bonusDef += recipe.stats.def * mult;
       if (recipe.stats.atk) bonusAtk += recipe.stats.atk * mult;
       if (recipe.stats.crit) bonusCrit += recipe.stats.crit;
-      if (recipe.stats.minePower) bonusMinePower += recipe.stats.minePower * mult;
-      if (recipe.stats.mineSpeed) bonusMineSpeed *= recipe.stats.mineSpeed;
+      if (recipe.stats.spd) bonusSpeed += recipe.stats.spd;
     }
 
     // Titan buff
     if (this.activeBuffs.titan > 0) {
       bonusAtk *= 3;
-      bonusMinePower *= 5;
-    }
-
-    // Berserk buff
-    if (this.activeBuffs.berserk > 0) {
-      bonusMineSpeed *= 2.5;
     }
 
     this.maxHp = Math.floor(this.baseHp + bonusHp);
@@ -416,40 +451,29 @@ export class Player {
     this.stats = {
       atk: Math.floor(bonusAtk),
       def: Math.floor(bonusDef),
-      minePower: Math.floor(bonusMinePower),
-      mineSpeed: bonusMineSpeed,
       crit: bonusCrit
     };
   }
 
   addExp(amount, onLevelUp) {
     if (this.miningLevel >= 100) return;
-
-    // Lv 3 Cuốc Vàng bonus
-    const pickRecipe = RECIPES.find(r => r.id === this.equipment.tool);
-    if (pickRecipe && pickRecipe.stats.bonusExp) {
-      amount = Math.floor(amount * (1 + pickRecipe.stats.bonusExp));
-    }
-
     this.miningExp += amount;
     while (this.miningLevel < 100 && this.miningExp >= this.miningExpNeeded) {
       this.miningExp -= this.miningExpNeeded;
       this.miningLevel++;
       this.miningExpNeeded = this.calcExpNeeded(this.miningLevel);
-      this.hp = this.maxHp; // Heal to full on level up
+      this.hp = this.maxHp;
       this.recalculateStats();
       if (onLevelUp) onLevelUp(this.miningLevel);
     }
   }
 
   takeDamage(incomingDmg) {
-    // Level 100 Titan is invulnerable!
     if (this.activeBuffs.titan > 0) return 0;
-
     let def = this.stats.def;
     let actualDmg = Math.max(1, incomingDmg - Math.floor(def * 0.5));
 
-    // Level 90 Passive: Hắc Giáp Kim Cang (-35% dmg)
+    // Lv 90 Passive: Hắc Giáp Kim Cang (-35% dmg)
     if (this.miningLevel >= 90) {
       actualDmg = Math.floor(actualDmg * 0.65);
     }
@@ -459,30 +483,24 @@ export class Player {
   }
 
   update(dt, input) {
-    // Update cooldowns
     for (const key in this.skillCooldowns) {
       if (this.skillCooldowns[key] > 0) {
         this.skillCooldowns[key] = Math.max(0, this.skillCooldowns[key] - dt);
       }
     }
 
-    // Update buffs
     for (const b in this.activeBuffs) {
       if (this.activeBuffs[b] > 0) {
         this.activeBuffs[b] = Math.max(0, this.activeBuffs[b] - dt);
-        if (this.activeBuffs[b] <= 0) {
-          this.recalculateStats();
-        }
+        if (this.activeBuffs[b] <= 0) this.recalculateStats();
       }
     }
 
-    // Natural regen or armor regen
-    const armorRecipe = RECIPES.find(r => r.id === this.equipment.armor);
+    const armorRecipe = EQUIPMENT_RECIPES.find(r => r.id === this.equipment.armor);
     if (armorRecipe && armorRecipe.stats.hpRegen) {
       this.hp = Math.min(this.maxHp, this.hp + armorRecipe.stats.hpRegen * dt);
     }
 
-    // Movement
     let dx = 0;
     let dy = 0;
     if (input.up) dy -= 1;
@@ -490,7 +508,6 @@ export class Player {
     if (input.left) dx -= 1;
     if (input.right) dx += 1;
 
-    // Joystick input
     if (input.joyX !== 0 || input.joyY !== 0) {
       dx = input.joyX;
       dy = input.joyY;
@@ -504,9 +521,8 @@ export class Player {
       if (dx !== 0) this.facing = dx > 0 ? 1 : -1;
     }
 
-    // Swing animation
     if (this.isSwinging) {
-      this.swingTimer += dt * 10 * this.stats.mineSpeed;
+      this.swingTimer += dt * 10;
       this.swingAngle = Math.sin(this.swingTimer) * 1.4;
       if (this.swingTimer >= Math.PI) {
         this.isSwinging = false;
@@ -537,16 +553,7 @@ export class Player {
     ctx.ellipse(sx, sy + r * 0.85, r * 0.95, r * 0.45, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // Whirlwind Skill Visual (Lv 60)
-    if (this.activeBuffs.whirlwind > 0) {
-      ctx.strokeStyle = '#00e5ff';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.arc(sx, sy, r + 24, Date.now() * 0.01, Date.now() * 0.01 + Math.PI * 1.5);
-      ctx.stroke();
-    }
-
-    // Titan Glowing Aura (Lv 100)
+    // Titan Aura (Lv 100)
     if (isTitan) {
       ctx.strokeStyle = '#ffd700';
       ctx.lineWidth = 6;
@@ -557,73 +564,69 @@ export class Player {
       ctx.stroke();
     }
 
-    // Body (Hero character with armor tint)
-    let bodyColor = '#1e88e5'; // Default blue adventurer
+    // Boots (Feet)
+    ctx.fillStyle = this.equipment.boots ? '#b0bec5' : '#5d4037';
+    ctx.fillRect(sx - r * 0.5, sy + r * 0.5, r * 0.4, r * 0.4);
+    ctx.fillRect(sx + r * 0.1, sy + r * 0.5, r * 0.4, r * 0.4);
+
+    // Pants (Legs)
+    ctx.fillStyle = this.equipment.pants ? '#37474f' : '#1e3c72';
+    ctx.fillRect(sx - r * 0.6, sy + r * 0.2, r * 1.2, r * 0.4);
+
+    // Chest Armor (Body)
+    let bodyColor = '#2a5298';
     if (this.equipment.armor) {
-      const arm = RECIPES.find(r => r.id === this.equipment.armor);
-      if (arm) {
-        if (arm.tier === 1) bodyColor = '#8d6e63';
-        if (arm.tier === 2) bodyColor = '#78909c';
-        if (arm.tier === 3) bodyColor = '#ffd54f';
-        if (arm.tier === 4) bodyColor = '#26c6da';
-        if (arm.tier === 5) bodyColor = '#303f9f';
-        if (arm.tier === 6) bodyColor = '#ab47bc';
-      }
+      if (this.equipment.armor.includes('leather')) bodyColor = '#8d6e63';
+      else if (this.equipment.armor.includes('iron')) bodyColor = '#78909c';
+      else if (this.equipment.armor.includes('gold')) bodyColor = '#ffd54f';
+      else if (this.equipment.armor.includes('mythril')) bodyColor = '#ba68c8';
     }
     if (isTitan) bodyColor = '#d50000';
 
     ctx.fillStyle = bodyColor;
     ctx.beginPath();
-    ctx.arc(sx, sy, r, 0, Math.PI * 2);
+    ctx.arc(sx, sy, r * 0.75, 0, Math.PI * 2);
     ctx.fill();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = '#ffffff44';
+    ctx.strokeStyle = '#000000';
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Eyes / Helmet visor
-    ctx.fillStyle = '#ffffff';
-    const eyeOffset = this.facing * (r * 0.35);
+    // Helmet / Head
+    ctx.fillStyle = '#ffcc80'; // Face skin
     ctx.beginPath();
-    ctx.arc(sx + eyeOffset, sy - r * 0.2, r * 0.25, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#000000';
-    ctx.beginPath();
-    ctx.arc(sx + eyeOffset + this.facing * 2, sy - r * 0.2, r * 0.12, 0, Math.PI * 2);
+    ctx.arc(sx, sy - r * 0.45, r * 0.45, 0, Math.PI * 2);
     ctx.fill();
 
-    // Weapon / Pickaxe in hand
-    ctx.save();
-    ctx.translate(sx + this.facing * (r * 0.8), sy);
-    ctx.rotate((this.facing * this.swingAngle) + (this.facing > 0 ? 0.3 : -0.3));
-
-    // Draw tool/weapon
-    const pickId = this.equipment.tool;
-    const pickRecipe = RECIPES.find(r => r.id === pickId);
-    let toolColor = '#8d6e63';
-    if (pickRecipe) {
-      if (pickRecipe.tier === 2) toolColor = '#b0bec5';
-      if (pickRecipe.tier === 3) toolColor = '#ffd700';
-      if (pickRecipe.tier === 4) toolColor = '#00e5ff';
-      if (pickRecipe.tier === 5) toolColor = '#673ab7';
-      if (pickRecipe.tier === 6) toolColor = '#e040fb';
+    // If Helmet is equipped
+    if (this.equipment.helmet) {
+      ctx.fillStyle = this.equipment.helmet.includes('iron') ? '#b0bec5' : (this.equipment.helmet.includes('titan') ? '#607d8b' : '#ffb300');
+      ctx.beginPath();
+      ctx.arc(sx, sy - r * 0.6, r * 0.5, Math.PI, 0, false);
+      ctx.fill();
+      ctx.stroke();
     }
 
-    // Handle
-    ctx.fillStyle = '#5d4037';
-    ctx.fillRect(-2, -r * 0.6, 4, r * 1.5);
-    // Pick Head
-    ctx.fillStyle = toolColor;
+    // Eyes
+    ctx.fillStyle = '#000000';
+    const eyeOffset = this.facing * (r * 0.2);
     ctx.beginPath();
-    ctx.arc(0, -r * 0.6, r * 0.6, Math.PI, 0, false);
-    ctx.lineTo(r * 0.8, -r * 0.6);
-    ctx.lineTo(0, -r * 0.9);
-    ctx.lineTo(-r * 0.8, -r * 0.6);
-    ctx.closePath();
+    ctx.arc(sx + eyeOffset, sy - r * 0.45, 2, 0, Math.PI * 2);
     ctx.fill();
+
+    // Weapon / Tool in hand
+    ctx.save();
+    ctx.translate(sx + this.facing * (r * 0.7), sy);
+    ctx.rotate((this.facing * this.swingAngle) + (this.facing > 0 ? 0.3 : -0.3));
+
+    // Draw weapon blade
+    ctx.fillStyle = '#b0bec5';
+    ctx.fillRect(-2, -r * 0.7, 4, r * 1.4);
+    ctx.fillStyle = '#ffd700';
+    ctx.fillRect(-4, -r * 0.1, 8, 3);
 
     ctx.restore();
 
-    // HP Bar over player
+    // HP Bar
     const barW = r * 2.4;
     const barH = 5;
     const pct = Math.max(0, this.hp / this.maxHp);
