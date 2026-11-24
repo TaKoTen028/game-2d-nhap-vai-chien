@@ -1,3 +1,4 @@
+/* Warspear Online & Heartwood Online MMORPG Aesthetic + Sandship Factory Styling */
 * {
   box-sizing: border-box;
   user-select: none;
@@ -10,9 +11,9 @@ body, html {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #0d1117;
+  background-color: #0c0e14;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  color: #f0f6fc;
+  color: #e6edf3;
 }
 
 #game-container {
@@ -29,112 +30,118 @@ canvas#gameCanvas {
   touch-action: none;
 }
 
-/* TOP HUD */
+/* TOP HUD - MMORPG STYLE (WARSPEAR / HEARTWOOD) */
 #top-hud {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 8px;
+  left: 8px;
   right: 130px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   pointer-events: none;
   z-index: 10;
 }
 
-.hud-row {
+.hud-top-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
-.level-badge {
-  background: linear-gradient(135deg, #ffd700, #ff8f00);
-  color: #1a1a1a;
-  font-weight: 900;
-  font-size: 14px;
-  padding: 4px 10px;
-  border-radius: 14px;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-  white-space: nowrap;
+.char-portrait {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: radial-gradient(circle, #2a5298 0%, #1e3c72 100%);
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
 }
 
-.bar-container {
+.bar-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   flex: 1;
-  max-width: 260px;
-  background: rgba(15, 20, 25, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  height: 18px;
+  max-width: 240px;
+}
+
+.mmo-bar-box {
+  background: rgba(13, 17, 23, 0.9);
+  border: 1px solid #c9a04a;
+  border-radius: 4px;
+  height: 16px;
   position: relative;
   overflow: hidden;
-  backdrop-filter: blur(4px);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
-.bar-fill {
+.mmo-bar-fill {
   height: 100%;
   transition: width 0.2s ease-out;
 }
 
 #hp-fill {
-  background: linear-gradient(90deg, #d32f2f, #ff5252);
+  background: linear-gradient(90deg, #b71c1c, #f44336);
   width: 100%;
 }
 
 #exp-fill {
-  background: linear-gradient(90deg, #00b0ff, #00e5ff);
+  background: linear-gradient(90deg, #00838f, #00e5ff);
   width: 0%;
 }
 
-.bar-label {
+.mmo-bar-text {
   position: absolute;
-  width: 100%;
-  top: 0;
-  left: 0;
-  line-height: 18px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 700;
-  color: #ffffff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  color: #fff;
+  text-shadow: 0 1px 2px #000;
 }
 
+/* TOP MENU BUTTONS */
 .hud-buttons {
   pointer-events: auto;
   display: flex;
-  gap: 8px;
-  margin-top: 4px;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
-.hud-btn {
-  background: rgba(22, 27, 34, 0.9);
-  border: 1px solid rgba(255, 215, 0, 0.35);
-  color: #ffd700;
+.mmo-btn {
+  background: linear-gradient(180deg, #2d261e 0%, #17130e 100%);
+  border: 1px solid #d4af37;
+  color: #fce8a6;
+  font-size: 11px;
   font-weight: 700;
-  font-size: 12px;
-  padding: 6px 12px;
-  border-radius: 8px;
+  padding: 5px 9px;
+  border-radius: 4px;
   cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
-  gap: 5px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-  transition: all 0.15s ease;
+  gap: 4px;
 }
 
-.hud-btn:hover, .hud-btn:active {
-  background: rgba(255, 215, 0, 0.2);
-  border-color: #ffd700;
-  transform: translateY(-1px);
+.mmo-btn:active {
+  transform: translateY(1px);
+  background: #3e3328;
 }
 
-/* VIRTUAL JOYSTICK (TOUCH) */
+/* VIRTUAL JOYSTICK */
 #joystick-zone {
   position: absolute;
   bottom: 20px;
   left: 20px;
-  width: 130px;
-  height: 130px;
+  width: 120px;
+  height: 120px;
   z-index: 15;
   touch-action: none;
 }
@@ -143,8 +150,8 @@ canvas#gameCanvas {
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.4) 100%);
-  border: 2px dashed rgba(255, 255, 255, 0.25);
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, rgba(0, 0, 0, 0.6) 100%);
+  border: 2px dashed rgba(212, 175, 55, 0.4);
   position: relative;
   display: flex;
   align-items: center;
@@ -152,71 +159,65 @@ canvas#gameCanvas {
 }
 
 #joystick-knob {
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #00b0ff, #0091ea);
-  border: 2px solid #ffffff;
-  box-shadow: 0 0 12px rgba(0, 176, 255, 0.6);
+  background: radial-gradient(circle, #f39c12 0%, #d35400 100%);
+  border: 2px solid #ffeaa7;
+  box-shadow: 0 0 10px rgba(243, 156, 18, 0.8);
   position: absolute;
   pointer-events: none;
-  transform: translate(0px, 0px);
 }
 
-/* ACTION & SKILL CONTROLS (BOTTOM RIGHT) */
+/* ACTION & SKILL CONTROLS */
 #action-controls {
   position: absolute;
-  bottom: 20px;
-  right: 20px;
+  bottom: 18px;
+  right: 18px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 12px;
+  gap: 10px;
   z-index: 15;
 }
 
 .skills-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .skill-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: rgba(26, 32, 44, 0.95);
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  background: #1e1b18;
+  border: 2px solid #8d6e63;
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.5);
   overflow: hidden;
-  transition: transform 0.1s, border-color 0.2s;
 }
 
 .skill-btn.unlocked {
   border-color: #ffd700;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
 }
 
 .skill-btn.locked {
-  opacity: 0.4;
+  opacity: 0.35;
   filter: grayscale(1);
   cursor: not-allowed;
-}
-
-.skill-btn:active:not(.locked) {
-  transform: scale(0.92);
 }
 
 .skill-hotkey {
   position: absolute;
   bottom: 2px;
-  right: 4px;
+  right: 3px;
   font-size: 9px;
   font-weight: 900;
   color: #ffd700;
@@ -227,7 +228,7 @@ canvas#gameCanvas {
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
   color: #ffffff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: bold;
   display: flex;
   align-items: center;
@@ -236,12 +237,12 @@ canvas#gameCanvas {
 }
 
 .action-main-btn {
-  width: 76px;
-  height: 76px;
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #ff9100, #ff3d00);
-  border: 3px solid #ffffff;
-  box-shadow: 0 0 18px rgba(255, 87, 34, 0.6);
+  background: radial-gradient(circle, #e67e22 0%, #c0392b 100%);
+  border: 3px solid #fce8a6;
+  box-shadow: 0 0 16px rgba(230, 126, 34, 0.7);
   color: #ffffff;
   display: flex;
   flex-direction: column;
@@ -249,30 +250,24 @@ canvas#gameCanvas {
   justify-content: center;
   cursor: pointer;
   font-weight: 900;
-  font-size: 12px;
-  gap: 2px;
-  transition: transform 0.1s;
+  font-size: 11px;
 }
 
 .action-main-btn:active {
   transform: scale(0.92);
 }
 
-.action-main-btn span.icon {
-  font-size: 28px;
-}
-
-/* MODALS */
+/* MODALS - MMORPG PARCHMENT & STONE BORDER */
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(5, 10, 15, 0.75);
-  backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
   z-index: 100;
   display: none;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 12px;
 }
 
 .modal.active {
@@ -280,50 +275,46 @@ canvas#gameCanvas {
 }
 
 .modal-content {
-  background: #161b22;
-  border: 2px solid #ffd700;
-  border-radius: 14px;
+  background: #1a1612;
+  border: 3px solid #c9a04a;
+  border-radius: 8px;
   width: 100%;
-  max-width: 580px;
-  max-height: 85vh;
+  max-width: 600px;
+  max-height: 88vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
   overflow: hidden;
 }
 
 .modal-header {
-  padding: 14px 18px;
-  border-bottom: 1px solid rgba(255, 215, 0, 0.25);
+  padding: 12px 16px;
+  background: linear-gradient(180deg, #382c1f 0%, #20180f 100%);
+  border-bottom: 2px solid #c9a04a;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 215, 0, 0.05);
 }
 
 .modal-header h2 {
-  font-size: 18px;
+  font-size: 16px;
   color: #ffd700;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .close-btn {
   background: transparent;
   border: none;
-  color: #8b949e;
-  font-size: 24px;
+  color: #e0d0b0;
+  font-size: 22px;
   cursor: pointer;
-  line-height: 1;
-}
-
-.close-btn:hover {
-  color: #ffffff;
+  font-weight: bold;
 }
 
 .modal-body {
-  padding: 16px;
+  padding: 14px;
   overflow-y: auto;
   flex: 1;
   display: flex;
@@ -331,215 +322,191 @@ canvas#gameCanvas {
   gap: 12px;
 }
 
-/* SKILLS LIST */
-.skill-card {
-  display: flex;
-  gap: 14px;
-  background: rgba(33, 38, 45, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  padding: 12px;
-  align-items: center;
-}
-
-.skill-card.unlocked {
-  border-color: rgba(0, 230, 118, 0.4);
-  background: rgba(0, 230, 118, 0.05);
-}
-
-.skill-card-icon {
-  font-size: 32px;
-  width: 50px;
-  height: 50px;
-  background: #0d1117;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.skill-card-info {
-  flex: 1;
-}
-
-.skill-card-title {
-  font-size: 15px;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.badge-passive {
-  background: #3f51b5;
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.badge-active {
-  background: #ff5722;
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.skill-card-desc {
-  font-size: 12px;
-  color: #8b949e;
-  margin-top: 4px;
-  line-height: 1.4;
-}
-
-/* CRAFTING LIST */
-.craft-tabs {
-  display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 6px;
-}
-
-.craft-tab {
-  background: #21262d;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #8b949e;
-  font-size: 12px;
-  padding: 6px 12px;
+/* SANDSHIP FACTORY STYLING */
+.factory-hero {
+  background: #0f1217;
+  border: 1px solid #4a3e2c;
   border-radius: 6px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.craft-tab.active {
-  background: #ffd700;
-  color: #1a1a1a;
-  font-weight: 700;
-  border-color: #ffd700;
-}
-
-.craft-card {
-  background: rgba(33, 38, 45, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
   padding: 12px;
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.conveyor-track {
+  height: 50px;
+  background: repeating-linear-gradient(90deg, #2b303c 0px, #2b303c 15px, #1a1e26 15px, #1a1e26 30px);
+  border: 2px solid #546e7a;
+  border-radius: 6px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  animation: beltMove 1.5s linear infinite;
+}
+
+@keyframes beltMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 30px 0; }
+}
+
+.factory-stations {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.station-card {
+  background: #171c24;
+  border: 1px solid #37474f;
+  border-radius: 6px;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.station-icon {
+  font-size: 24px;
+  margin-bottom: 2px;
+}
+
+.factory-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
 }
 
-.craft-card-top {
+.factory-action-box {
+  background: #211c15;
+  border: 1px solid #6d553b;
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.factory-btn {
+  background: linear-gradient(180deg, #d35400 0%, #a04000 100%);
+  color: #fff;
+  border: 1px solid #f39c12;
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.factory-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* CHARACTER PAPERDOLL (WARSPEAR / HEARTWOOD) */
+.paperdoll-container {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  background: #12100d;
+  border: 1px solid #534027;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.avatar-preview-box {
+  width: 90px;
+  height: 120px;
+  background: radial-gradient(circle, #3d3120 0%, #151109 100%);
+  border: 2px solid #ffd700;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.avatar-sprite {
+  font-size: 50px;
+}
+
+.equip-slots-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+.equip-slot-item {
+  background: #1f1a14;
+  border: 1px solid #6b5535;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.equip-slot-icon {
+  font-size: 18px;
+}
+
+.tools-belt-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.tool-card {
+  background: #1c1813;
+  border: 1px solid #8d6e63;
+  border-radius: 6px;
+  padding: 8px 4px;
+  text-align: center;
+  font-size: 11px;
+}
+
+/* CRAFTING & RECIPES */
+.recipe-card {
+  background: #1c1712;
+  border: 1px solid #5a452a;
+  border-radius: 6px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recipe-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.craft-card-title {
-  font-size: 15px;
-  font-weight: 700;
-  color: #f0f6fc;
+.recipe-name {
+  font-weight: bold;
+  font-size: 13px;
+  color: #ffd700;
 }
 
-.craft-tier {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.tier-1 { background: #8d6e63; color: #fff; }
-.tier-2 { background: #78909c; color: #fff; }
-.tier-3 { background: #ffd54f; color: #000; }
-.tier-4 { background: #00e5ff; color: #000; }
-.tier-5 { background: #7e57c2; color: #fff; }
-.tier-6 { background: #f06292; color: #fff; }
-
-.craft-cost {
+.recipe-costs {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  font-size: 12px;
+  gap: 6px;
+  font-size: 11px;
 }
 
-.cost-item {
-  background: #0d1117;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.cost-tag {
+  background: #0d0c0a;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid #443725;
 }
 
-.cost-item.has-enough {
-  color: #00e676;
-}
-
-.cost-item.not-enough {
-  color: #ff5252;
-}
-
-.craft-action-btn {
-  background: linear-gradient(135deg, #ffd700, #ff8f00);
-  color: #161b22;
-  font-weight: bold;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  align-self: flex-end;
-  font-size: 12px;
-}
-
-.craft-action-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  filter: grayscale(1);
-}
-
-/* INVENTORY & STATS */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  background: rgba(13, 17, 23, 0.6);
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  font-size: 13px;
-}
-
-.stat-item {
-  display: flex;
-  justify-content: space-between;
-}
-
-.stat-val {
-  color: #ffd700;
-  font-weight: 700;
-}
-
-.inventory-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.inv-item {
-  background: rgba(33, 38, 45, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  padding: 8px;
-  text-align: center;
-  font-size: 12px;
-}
-
-.inv-item-count {
-  font-size: 16px;
-  font-weight: 900;
-  color: #00e5ff;
-  margin-top: 4px;
-}
+.cost-tag.ready { color: #00e676; }
+.cost-tag.lack { color: #ff5252; }
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
@@ -547,25 +514,17 @@ canvas#gameCanvas {
     right: 125px;
     gap: 4px;
   }
-  .bar-container {
+  .bar-stack {
     max-width: 140px;
-    height: 15px;
   }
-  .bar-label {
-    line-height: 15px;
+  .mmo-btn {
+    padding: 3px 6px;
     font-size: 10px;
   }
-  .hud-btn {
-    padding: 4px 8px;
-    font-size: 10px;
+  .factory-actions-grid {
+    grid-template-columns: 1fr;
   }
-  .action-main-btn {
-    width: 68px;
-    height: 68px;
-  }
-  .skill-btn {
-    width: 42px;
-    height: 42px;
-    font-size: 18px;
+  .tools-belt-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
