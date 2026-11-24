@@ -1,5 +1,5 @@
 import { Game } from './game.js';
-import { SKILLS, RECIPES, RESOURCE_TYPES } from './data.js';
+import { SKILLS, TOOLS, EQUIPMENT_RECIPES, FACTORY_PRODUCTS, RAW_RESOURCES } from './data.js';
 
 window.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('gameCanvas');
@@ -15,19 +15,17 @@ window.addEventListener('DOMContentLoaded', () => {
   game.start();
 
   // DOM Elements
-  const levelBadge = document.getElementById('level-badge');
   const hpFill = document.getElementById('hp-fill');
   const hpLabel = document.getElementById('hp-label');
   const expFill = document.getElementById('exp-fill');
   const expLabel = document.getElementById('exp-label');
 
   // Modals
-  const modalSkills = document.getElementById('modal-skills');
+  const modalFactory = document.getElementById('modal-factory');
+  const modalChar = document.getElementById('modal-char');
   const modalCraft = document.getElementById('modal-craft');
-  const modalInv = document.getElementById('modal-inv');
-  const skillsList = document.getElementById('skills-list');
-  const craftList = document.getElementById('craft-list');
-  const invGrid = document.getElementById('inv-grid');
+  const modalSkills = document.getElementById('modal-skills');
+  const modalBackup = document.getElementById('modal-backup');
 
   // Quick skill buttons
   const skillBtns = {
@@ -48,14 +46,13 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Action Button
   const btnAction = document.getElementById('btn-action');
-  const triggerAction = (e) => {
-    if (e) e.preventDefault();
+  btnAction.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
     window.soundEngine.ensureContext();
     game.performAction();
-  };
-  btnAction.addEventListener('pointerdown', triggerAction);
+  });
 
-  // Skill buttons click
+  // Skill hotkeys / touches
   for (const skillId in skillBtns) {
     const btn = skillBtns[skillId];
     if (btn) {
@@ -73,7 +70,7 @@ window.addEventListener('DOMContentLoaded', () => {
   let joyActive = false;
   let joyTouchId = null;
   let joyCenter = { x: 0, y: 0 };
-  const maxJoyDist = 45;
+  const maxJoyDist = 42;
 
   joyZone.addEventListener('pointerdown', (e) => {
     e.preventDefault();
@@ -117,23 +114,33 @@ window.addEventListener('DOMContentLoaded', () => {
     game.input.joyY = knobY / maxJoyDist;
   }
 
-  // Modal open buttons
+  // Modal Open Buttons
+  document.getElementById('btn-open-factory').addEventListener('click', () => {
+    renderFactoryOperations();
+    modalFactory.classList.add('active');
+  });
+
+  document.getElementById('btn-open-char').addEventListener('click', () => {
+    renderCharacterModal();
+    modalChar.classList.add('active');
+  });
+
+  document.getElementById('btn-open-craft').addEventListener('click', () => {
+    renderCraftingModal(currentCraftTab);
+    modalCraft.classList.add('active');
+  });
+
   document.getElementById('btn-open-skills').addEventListener('click', () => {
     renderSkillsModal();
     modalSkills.classList.add('active');
   });
 
-  document.getElementById('btn-open-craft').addEventListener('click', () => {
-    renderCraftModal('all');
-    modalCraft.classList.add('active');
+  document.getElementById('btn-open-backup').addEventListener('click', () => {
+    document.getElementById('save-code-box').value = game.exportSaveCode();
+    modalBackup.classList.add('active');
   });
 
-  document.getElementById('btn-open-inv').addEventListener('click', () => {
-    renderInventoryModal();
-    modalInv.classList.add('active');
-  });
-
-  // Modal close buttons
+  // Modal Close Buttons
   document.querySelectorAll('[data-close]').forEach(btn => {
     btn.addEventListener('click', () => {
       const modalId = btn.getAttribute('data-close');
@@ -141,157 +148,309 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Close modal when tapping outside content
   document.querySelectorAll('.modal').forEach(m => {
     m.addEventListener('click', (e) => {
       if (e.target === m) m.classList.remove('active');
     });
   });
 
-  // Crafting tabs
-  let currentCraftCat = 'all';
-  document.querySelectorAll('.craft-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.craft-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      currentCraftCat = tab.getAttribute('data-cat');
-      renderCraftModal(currentCraftCat);
+  // --- RENDER SANDSHIP FACTORY OPERATIONS ---
+  function renderFactoryOperations() {
+    const container = document.getElementById('factory-operations');
+    container.innerHTML = `
+      <!-- Station 1: Smelting Furnace -->
+      <div class="factory-action-box">
+        <b style="color: #ff9800;">🔥 LÒ NUNG QUẶNG (Smelter)</b>
+        <div style="font-size: 11px; color: #8b949e;">Nung nóng quặng thô thành Thỏi Kim Loại đúc sẵn:</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+          <button class="factory-btn" id="btn-smelt-copper">Nung Thỏi Đồng (Cần 2 Quặng Đồng: ${game.player.inventory['ore_5'] || 0})</button>
+          <button class="factory-btn" id="btn-smelt-iron">Nung Thỏi Sắt (Cần 2 Quặng Sắt: ${game.player.inventory['ore_12'] || 0})</button>
+          <button class="factory-btn" id="btn-smelt-gold">Nung Thỏi Vàng (Cần 3 Quặng Vàng: ${game.player.inventory['ore_22'] || 0})</button>
+          <button class="factory-btn" id="btn-smelt-titan">Nung Thỏi Titan (Cần 3 Quặng Titan: ${game.player.inventory['ore_40'] || 0})</button>
+          <button class="factory-btn" id="btn-smelt-mythril">Nung Thỏi Thái Cổ (Cần 3 Quặng Thái Cổ: ${game.player.inventory['ore_50'] || 0})</button>
+        </div>
+      </div>
+
+      <!-- Station 2: Hydraulic Press -->
+      <div class="factory-action-box">
+        <b style="color: #00e5ff;">🔨 MÁY ÉP TẤM (Hydraulic Press)</b>
+        <div style="font-size: 11px; color: #8b949e;">Dập thỏi kim loại thành Tấm Thép bọc giáp:</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+          <button class="factory-btn" id="btn-press-iron">Ép Tấm Thép Sắt (Cần 1 Thỏi Sắt: ${game.player.inventory['ingot_iron'] || 0})</button>
+          <button class="factory-btn" id="btn-press-silver">Ép Tấm Bạc (Cần 1 Thỏi Bạc: ${game.player.inventory['ingot_silver'] || 0})</button>
+          <button class="factory-btn" id="btn-press-gold">Ép Tấm Vàng (Cần 1 Thỏi Vàng: ${game.player.inventory['ingot_gold'] || 0})</button>
+          <button class="factory-btn" id="btn-press-titan">Ép Tấm Titan (Cần 1 Thỏi Titan: ${game.player.inventory['ingot_titan'] || 0})</button>
+          <button class="factory-btn" id="btn-press-mythril">Ép Tấm Thái Cổ (Cần 1 Thỏi Thái Cổ: ${game.player.inventory['ingot_mythril'] || 0})</button>
+        </div>
+      </div>
+
+      <!-- Station 3: Extruder Pipe Former -->
+      <div class="factory-action-box">
+        <b style="color: #e040fb;">⚙️ MÁY CÁN ĐÙN ỐNG (Pipe Extruder)</b>
+        <div style="font-size: 11px; color: #8b949e;">Cán thỏi thành Ống Thép & Khung cơ khí:</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+          <button class="factory-btn" id="btn-extrude-copper">Cán Ống Đồng (Cần 1 Thỏi Đồng: ${game.player.inventory['ingot_copper'] || 0})</button>
+          <button class="factory-btn" id="btn-extrude-steel">Cán Ống Thép Sắt (Cần 1 Thỏi Sắt: ${game.player.inventory['ingot_iron'] || 0})</button>
+          <button class="factory-btn" id="btn-extrude-titan">Cán Ống Titan (Cần 1 Thỏi Titan: ${game.player.inventory['ingot_titan'] || 0})</button>
+          <button class="factory-btn" id="btn-extrude-mythril">Cán Ống Thái Cổ (Cần 1 Thỏi Thái Cổ: ${game.player.inventory['ingot_mythril'] || 0})</button>
+        </div>
+      </div>
+
+      <!-- Station 4: Loom Weaver -->
+      <div class="factory-action-box">
+        <b style="color: #69f0ae;">🧶 MÁY DỆT SỢI BÔNG (Weaving Loom)</b>
+        <div style="font-size: 11px; color: #8b949e;">Kéo sợi bông dại thành Cuộn Vải may mặc:</div>
+        <div style="display: flex; flex-direction: column; gap: 4px; margin-top: 4px;">
+          <button class="factory-btn" id="btn-weave-rough">Dệt Vải Thô (Cần 2 Bông Cỏ Dại: ${game.player.inventory['flora_1'] || 0})</button>
+          <button class="factory-btn" id="btn-weave-fine">Dệt Vải Bông Trắng (Cần 2 Bông Trắng: ${game.player.inventory['flora_5'] || 0})</button>
+          <button class="factory-btn" id="btn-weave-silver">Dệt Ngân Sợi (Cần 2 Thảo Dược Bạc: ${game.player.inventory['flora_18'] || 0})</button>
+          <button class="factory-btn" id="btn-weave-mythic">Dệt Vải Thần Liên (Cần 2 Thần Liên: ${game.player.inventory['flora_50'] || 0})</button>
+        </div>
+      </div>
+    `;
+
+    // Connect Smelter buttons
+    document.getElementById('btn-smelt-copper')?.addEventListener('click', () => { game.runFactorySmelt('ore_5'); renderFactoryOperations(); });
+    document.getElementById('btn-smelt-iron')?.addEventListener('click', () => { game.runFactorySmelt('ore_12'); renderFactoryOperations(); });
+    document.getElementById('btn-smelt-gold')?.addEventListener('click', () => { game.runFactorySmelt('ore_22'); renderFactoryOperations(); });
+    document.getElementById('btn-smelt-titan')?.addEventListener('click', () => { game.runFactorySmelt('ore_40'); renderFactoryOperations(); });
+    document.getElementById('btn-smelt-mythril')?.addEventListener('click', () => { game.runFactorySmelt('ore_50'); renderFactoryOperations(); });
+
+    // Connect Press buttons
+    document.getElementById('btn-press-iron')?.addEventListener('click', () => { game.runFactoryPress('ingot_iron'); renderFactoryOperations(); });
+    document.getElementById('btn-press-silver')?.addEventListener('click', () => { game.runFactoryPress('ingot_silver'); renderFactoryOperations(); });
+    document.getElementById('btn-press-gold')?.addEventListener('click', () => { game.runFactoryPress('ingot_gold'); renderFactoryOperations(); });
+    document.getElementById('btn-press-titan')?.addEventListener('click', () => { game.runFactoryPress('ingot_titan'); renderFactoryOperations(); });
+    document.getElementById('btn-press-mythril')?.addEventListener('click', () => { game.runFactoryPress('ingot_mythril'); renderFactoryOperations(); });
+
+    // Connect Extruder buttons
+    document.getElementById('btn-extrude-copper')?.addEventListener('click', () => { game.runFactoryExtrude('ingot_copper'); renderFactoryOperations(); });
+    document.getElementById('btn-extrude-steel')?.addEventListener('click', () => { game.runFactoryExtrude('ingot_iron'); renderFactoryOperations(); });
+    document.getElementById('btn-extrude-titan')?.addEventListener('click', () => { game.runFactoryExtrude('ingot_titan'); renderFactoryOperations(); });
+    document.getElementById('btn-extrude-mythril')?.addEventListener('click', () => { game.runFactoryExtrude('ingot_mythril'); renderFactoryOperations(); });
+
+    // Connect Weaver buttons
+    document.getElementById('btn-weave-rough')?.addEventListener('click', () => { game.runFactoryWeave('flora_1'); renderFactoryOperations(); });
+    document.getElementById('btn-weave-fine')?.addEventListener('click', () => { game.runFactoryWeave('flora_5'); renderFactoryOperations(); });
+    document.getElementById('btn-weave-silver')?.addEventListener('click', () => { game.runFactoryWeave('flora_18'); renderFactoryOperations(); });
+    document.getElementById('btn-weave-mythic')?.addEventListener('click', () => { game.runFactoryWeave('flora_50'); renderFactoryOperations(); });
+  }
+
+  // --- RENDER CHARACTER PAPERDOLL (5 SLOTS & 4 TOOLS) ---
+  function renderCharacterModal() {
+    const p = game.player;
+    document.getElementById('char-lvl-display').textContent = `Cấp ${p.miningLevel} Thợ Mỏ`;
+
+    // 5 Equipment Slots
+    const wpn = EQUIPMENT_RECIPES.find(r => r.id === p.equipment.weapon);
+    const helm = EQUIPMENT_RECIPES.find(r => r.id === p.equipment.helmet);
+    const arm = EQUIPMENT_RECIPES.find(r => r.id === p.equipment.armor);
+    const pants = EQUIPMENT_RECIPES.find(r => r.id === p.equipment.pants);
+    const boots = EQUIPMENT_RECIPES.find(r => r.id === p.equipment.boots);
+
+    document.getElementById('slot-wpn-name').textContent = wpn ? wpn.name : 'Tay không';
+    document.getElementById('slot-helm-name').textContent = helm ? helm.name : 'Chưa có';
+    document.getElementById('slot-arm-name').textContent = arm ? arm.name : 'Áo vải';
+    document.getElementById('slot-pants-name').textContent = pants ? pants.name : 'Quần vải';
+    document.getElementById('slot-boots-name').textContent = boots ? boots.name : 'Chưa có';
+
+    // 4 Gathering Tools Badges
+    const axe = TOOLS[p.tools.axe];
+    const pick = TOOLS[p.tools.pickaxe];
+    const knife = TOOLS[p.tools.knife];
+    const sickle = TOOLS[p.tools.sickle];
+
+    document.getElementById('tool-axe-badge').textContent = axe ? `Lv ${axe.reqLv} - ${axe.name}` : 'Lv 1';
+    document.getElementById('tool-pick-badge').textContent = pick ? `Lv ${pick.reqLv} - ${pick.name}` : 'Lv 1';
+    document.getElementById('tool-knife-badge').textContent = knife ? `Lv ${knife.reqLv} - ${knife.name}` : 'Lv 1';
+    document.getElementById('tool-sickle-badge').textContent = sickle ? `Lv ${sickle.reqLv} - ${sickle.name}` : 'Lv 1';
+
+    // Stats
+    document.getElementById('stat-atk').textContent = `${p.stats.atk}`;
+    document.getElementById('stat-def').textContent = `${p.stats.def}`;
+    document.getElementById('stat-crit').textContent = `${Math.floor(p.stats.crit * 100)}%`;
+  }
+
+  // --- RENDER CRAFTING & TOOL UPGRADE MODAL ---
+  let currentCraftTab = 'equip';
+  document.getElementById('tab-craft-equip').addEventListener('click', () => {
+    currentCraftTab = 'equip';
+    document.getElementById('tab-craft-equip').style.background = '#ffd700';
+    document.getElementById('tab-craft-equip').style.color = '#17130e';
+    document.getElementById('tab-craft-tools').style.background = 'linear-gradient(180deg, #2d261e 0%, #17130e 100%)';
+    document.getElementById('tab-craft-tools').style.color = '#fce8a6';
+    renderCraftingModal('equip');
+  });
+
+  document.getElementById('tab-craft-tools').addEventListener('click', () => {
+    currentCraftTab = 'tools';
+    document.getElementById('tab-craft-tools').style.background = '#ffd700';
+    document.getElementById('tab-craft-tools').style.color = '#17130e';
+    document.getElementById('tab-craft-equip').style.background = 'linear-gradient(180deg, #2d261e 0%, #17130e 100%)';
+    document.getElementById('tab-craft-equip').style.color = '#fce8a6';
+    renderCraftingModal('tools');
+  });
+
+  function renderCraftingModal(tab = 'equip') {
+    const container = document.getElementById('crafting-items-container');
+    container.innerHTML = '';
+
+    if (tab === 'equip') {
+      EQUIPMENT_RECIPES.forEach(recipe => {
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+
+        let canCraft = true;
+        let costHtml = '';
+        for (const res in recipe.cost) {
+          const required = recipe.cost[res];
+          const owned = game.player.inventory[res] || 0;
+          const hasEnough = owned >= required;
+          if (!hasEnough) canCraft = false;
+
+          const meta = RAW_RESOURCES[res] || FACTORY_PRODUCTS[res];
+          const name = meta ? meta.name : res;
+          costHtml += `<span class="cost-tag ${hasEnough ? 'ready' : 'lack'}">${name}: ${owned}/${required}</span>`;
+        }
+
+        const isEquipped = game.player.equipment[recipe.slot] === recipe.id;
+
+        card.innerHTML = `
+          <div class="recipe-header">
+            <span class="recipe-name">${recipe.name} (${recipe.slot.toUpperCase()})</span>
+            <span style="font-size: 11px; color: #ffd700;">Bậc ${recipe.tier}</span>
+          </div>
+          <div style="font-size: 11px; color: #8b949e;">${recipe.desc}</div>
+          <div class="recipe-costs">${costHtml}</div>
+          <button class="mmo-btn" style="align-self: flex-end;" ${!canCraft || isEquipped ? 'disabled' : ''}>
+            ${isEquipped ? 'Đang mặc' : (canCraft ? 'Chế tạo & Mặc' : 'Thiếu vật liệu')}
+          </button>
+        `;
+
+        const btn = card.querySelector('button');
+        if (canCraft && !isEquipped) {
+          btn.addEventListener('click', () => {
+            game.craftEquipment(recipe.id);
+            renderCraftingModal('equip');
+          });
+        }
+        container.appendChild(card);
+      });
+    } else {
+      // 4 Gathering Tools Upgrades
+      Object.values(TOOLS).forEach(tool => {
+        const card = document.createElement('div');
+        card.className = 'recipe-card';
+
+        let canCraft = true;
+        let costHtml = '';
+        for (const res in tool.cost) {
+          const required = tool.cost[res];
+          const owned = game.player.inventory[res] || 0;
+          const hasEnough = owned >= required;
+          if (!hasEnough) canCraft = false;
+
+          const meta = RAW_RESOURCES[res] || FACTORY_PRODUCTS[res];
+          const name = meta ? meta.name : res;
+          costHtml += `<span class="cost-tag ${hasEnough ? 'ready' : 'lack'}">${name}: ${owned}/${required}</span>`;
+        }
+
+        const currentToolId = game.player.tools[tool.type];
+        const isEquipped = currentToolId === tool.id;
+
+        card.innerHTML = `
+          <div class="recipe-header">
+            <span class="recipe-name">${tool.name} (Cấp ${tool.reqLv})</span>
+            <span style="font-size: 11px; color: #00e676;">Sức mạnh: ${tool.power}</span>
+          </div>
+          <div class="recipe-costs">${costHtml}</div>
+          <button class="mmo-btn" style="align-self: flex-end;" ${!canCraft || isEquipped ? 'disabled' : ''}>
+            ${isEquipped ? 'Đang dùng' : (canCraft ? 'Nâng cấp công cụ' : 'Thiếu vật liệu')}
+          </button>
+        `;
+
+        const btn = card.querySelector('button');
+        if (canCraft && !isEquipped) {
+          btn.addEventListener('click', () => {
+            game.upgradeTool(tool.id);
+            renderCraftingModal('tools');
+          });
+        }
+        container.appendChild(card);
+      });
+    }
+  }
+
+  // --- RENDER 10 SKILLS MODAL ---
+  function renderSkillsModal() {
+    const list = document.getElementById('skills-list');
+    list.innerHTML = '';
+    SKILLS.forEach(skill => {
+      const isUnlocked = game.player.miningLevel >= skill.reqLevel;
+      const card = document.createElement('div');
+      card.className = 'recipe-card';
+      card.style.borderColor = isUnlocked ? '#00e676' : '#443725';
+
+      card.innerHTML = `
+        <div class="recipe-header">
+          <span style="font-size: 13px; font-weight: bold; color: ${isUnlocked ? '#ffd700' : '#8b949e'};">
+            ${skill.icon} ${skill.name} (Mốc Lv ${skill.reqLevel})
+          </span>
+          <span style="font-size: 11px; color: ${skill.type === 'active' ? '#ff7043' : '#42a5f5'};">
+            ${skill.type === 'active' ? 'KÍCH HOẠT (Phím ' + (skill.hotkey || '') + ')' : 'THỤ ĐỘNG'}
+          </span>
+        </div>
+        <div style="font-size: 11px; color: #8b949e;">${skill.description}</div>
+        <div style="font-size: 11px; font-weight: bold; color: ${isUnlocked ? '#00e676' : '#ff5252'}; align-self: flex-end;">
+          ${isUnlocked ? '✔ ĐÃ MỞ KHÓA' : '🔒 CẦN LV ' + skill.reqLevel}
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  // --- BACKUP & SAVE CODE HANDLERS ---
+  document.getElementById('btn-copy-save').addEventListener('click', () => {
+    const box = document.getElementById('save-code-box');
+    box.select();
+    navigator.clipboard.writeText(box.value).then(() => {
+      alert('Đã sao chép chuỗi mã lưu thành công! Hãy dán vào Ghi Chú để lưu giữ nhé.');
+    }).catch(() => {
+      alert('Hãy bôi đen và sao chép thủ công chuỗi mã trong ô.');
     });
   });
 
-  // Reset Game Button
+  document.getElementById('btn-import-save').addEventListener('click', () => {
+    const str = prompt('Dán chuỗi mã lưu (Save Code) của bạn vào đây:');
+    if (str) {
+      const success = game.importSaveCode(str.trim());
+      if (success) {
+        alert('Đã khôi phục thành công tiến trình game!');
+        window.location.reload();
+      } else {
+        alert('Mã lưu không hợp lệ, vui lòng kiểm tra lại!');
+      }
+    }
+  });
+
   document.getElementById('btn-reset-game').addEventListener('click', () => {
-    if (confirm('Bạn có chắc muốn xóa tiến trình và chơi lại từ đầu không?')) {
+    if (confirm('Bạn có chắc muốn xóa toàn bộ dữ liệu chơi lại từ đầu không?')) {
       game.resetSave();
     }
   });
 
-  // Render Skills Modal
-  function renderSkillsModal() {
-    skillsList.innerHTML = '';
-    SKILLS.forEach(skill => {
-      const isUnlocked = game.player.miningLevel >= skill.reqLevel;
-      const card = document.createElement('div');
-      card.className = `skill-card ${isUnlocked ? 'unlocked' : 'locked'}`;
-
-      card.innerHTML = `
-        <div class="skill-card-icon">${skill.icon}</div>
-        <div class="skill-card-info">
-          <div class="skill-card-title">
-            <span>${skill.name} (Lv ${skill.reqLevel})</span>
-            <span class="${skill.type === 'active' ? 'badge-active' : 'badge-passive'}">
-              ${skill.type === 'active' ? 'KÍCH HOẠT' : 'THỤ ĐỘNG'}
-            </span>
-            ${isUnlocked 
-              ? '<span style="color: #00e676; font-size: 11px; margin-left: auto;">✔ Đã mở</span>' 
-              : `<span style="color: #ff5252; font-size: 11px; margin-left: auto;">🔒 Cần Lv ${skill.reqLevel}</span>`}
-          </div>
-          <div class="skill-card-desc">${skill.description}</div>
-        </div>
-      `;
-      skillsList.appendChild(card);
-    });
-  }
-
-  // Render Crafting Modal
-  function renderCraftModal(cat = 'all') {
-    craftList.innerHTML = '';
-    const filtered = RECIPES.filter(r => cat === 'all' || r.category === cat);
-
-    filtered.forEach(recipe => {
-      const card = document.createElement('div');
-      card.className = 'craft-card';
-
-      let canCraft = true;
-      let costMult = game.player.miningLevel >= 70 ? 0.75 : 1.0;
-
-      let costHtml = '';
-      for (const res in recipe.cost) {
-        const required = Math.max(1, Math.floor(recipe.cost[res] * costMult));
-        const owned = game.player.inventory[res] || 0;
-        const hasEnough = owned >= required;
-        if (!hasEnough) canCraft = false;
-
-        const meta = RESOURCE_TYPES[res];
-        costHtml += `
-          <div class="cost-item ${hasEnough ? 'has-enough' : 'not-enough'}">
-            ${meta ? meta.name : res}: ${owned}/${required}
-          </div>
-        `;
-      }
-
-      const isEquipped = game.player.equipment[recipe.category] === recipe.id;
-
-      card.innerHTML = `
-        <div class="craft-card-top">
-          <div class="craft-card-title">${recipe.name}</div>
-          <span class="craft-tier tier-${recipe.tier}">Bậc ${recipe.tier}</span>
-        </div>
-        <div style="font-size: 12px; color: #8b949e;">${recipe.desc}</div>
-        <div class="craft-cost">${costHtml}</div>
-        <button class="craft-action-btn" ${!canCraft || isEquipped ? 'disabled' : ''}>
-          ${isEquipped ? 'Đang trang bị' : (canCraft ? 'Chế tạo & Trang bị' : 'Thiếu nguyên liệu')}
-        </button>
-      `;
-
-      const btn = card.querySelector('.craft-action-btn');
-      if (canCraft && !isEquipped) {
-        btn.addEventListener('click', () => {
-          const res = game.craft(recipe.id);
-          renderCraftModal(currentCraftCat);
-        });
-      }
-
-      craftList.appendChild(card);
-    });
-  }
-
-  // Render Inventory Modal
-  function renderInventoryModal() {
-    const p = game.player;
-    document.getElementById('stat-level').textContent = `${p.miningLevel} / 100`;
-    document.getElementById('stat-hp').textContent = `${Math.floor(p.hp)} / ${p.maxHp}`;
-    document.getElementById('stat-atk').textContent = `${p.stats.atk}`;
-    document.getElementById('stat-def').textContent = `${p.stats.def}`;
-    document.getElementById('stat-mine').textContent = `${p.stats.minePower}`;
-    document.getElementById('stat-speed').textContent = `${p.stats.mineSpeed.toFixed(1)}x`;
-    document.getElementById('stat-crit').textContent = `${Math.floor(p.stats.crit * 100)}%`;
-
-    const wpn = RECIPES.find(r => r.id === p.equipment.weapon);
-    document.getElementById('stat-weapon').textContent = wpn ? wpn.name : 'Rìu Thô Sơ';
-
-    invGrid.innerHTML = '';
-    for (const key in RESOURCE_TYPES) {
-      const meta = RESOURCE_TYPES[key];
-      const count = p.inventory[key] || 0;
-      const item = document.createElement('div');
-      item.className = 'inv-item';
-      item.innerHTML = `
-        <div style="color: ${meta.color}; font-weight: bold;">${meta.name}</div>
-        <div class="inv-item-count">${count}</div>
-      `;
-      invGrid.appendChild(item);
-    }
-  }
-
-  // UI Tick loop (HUD & Cooldown updates)
+  // UI Tick Loop
   function uiLoop() {
     const p = game.player;
 
-    // Level badge
-    levelBadge.textContent = `CẤP ${p.miningLevel} ${p.miningLevel >= 100 ? '👑 MAX' : ''}`;
-
-    // HP Bar
     const hpPct = Math.max(0, Math.min(100, (p.hp / p.maxHp) * 100));
     hpFill.style.width = `${hpPct}%`;
     hpLabel.textContent = `${Math.floor(p.hp)} / ${p.maxHp} HP`;
 
-    // EXP Bar
     const expPct = Math.max(0, Math.min(100, (p.miningExp / p.miningExpNeeded) * 100));
     expFill.style.width = `${p.miningLevel >= 100 ? 100 : expPct}%`;
-    expLabel.textContent = p.miningLevel >= 100 ? 'MAX LV 100' : `EXP: ${p.miningExp} / ${p.miningExpNeeded}`;
+    expLabel.textContent = p.miningLevel >= 100 ? 'CẤP 100 (MAX)' : `CẤP ${p.miningLevel} - EXP: ${p.miningExp}/${p.miningExpNeeded}`;
 
-    // Skill Quick Buttons
     for (const skillId in skillBtns) {
       const btn = skillBtns[skillId];
       if (!btn) continue;
