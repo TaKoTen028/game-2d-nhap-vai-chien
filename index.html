@@ -3,94 +3,237 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Chiến Binh Khai Mỏ 2D - RPG & Chế Tạo</title>
+  <title>Chiến Binh Khai Mỏ 2D - Warspear & Sandship Factory</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div id="game-container">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- TOP HUD -->
+    <!-- TOP HUD (WARSPEAR & HEARTWOOD MMORPG) -->
     <div id="top-hud">
-      <div class="hud-row">
-        <div id="level-badge" class="level-badge">CẤP 1</div>
-        <div class="bar-container">
-          <div id="hp-fill" class="bar-fill"></div>
-          <div id="hp-label" class="bar-label">200 / 200 HP</div>
-        </div>
-      </div>
-
-      <div class="hud-row">
-        <div class="bar-container" style="max-width: 320px;">
-          <div id="exp-fill" class="bar-fill"></div>
-          <div id="exp-label" class="bar-label">EXP: 0 / 60</div>
+      <div class="hud-top-bar">
+        <div class="char-portrait">⚔️</div>
+        <div class="bar-stack">
+          <div class="mmo-bar-box">
+            <div id="hp-fill" class="mmo-bar-fill"></div>
+            <div id="hp-label" class="mmo-bar-text">200 / 200 HP</div>
+          </div>
+          <div class="mmo-bar-box">
+            <div id="exp-fill" class="mmo-bar-fill"></div>
+            <div id="exp-label" class="mmo-bar-text">CẤP 1 - EXP: 0/60</div>
+          </div>
         </div>
       </div>
 
       <div class="hud-buttons">
-        <button id="btn-open-skills" class="hud-btn">📜 10 Kỹ Năng</button>
-        <button id="btn-open-craft" class="hud-btn">🔨 Chế Tạo</button>
-        <button id="btn-open-inv" class="hud-btn">🎒 Túi Đồ</button>
-        <button id="btn-toggle-sound" class="hud-btn">🔊 Âm Thanh</button>
+        <button id="btn-open-factory" class="mmo-btn">🏭 Nhà Máy Sandship</button>
+        <button id="btn-open-char" class="mmo-btn">🛡️ Nhân Vật (5 Trang Bị)</button>
+        <button id="btn-open-craft" class="mmo-btn">🔨 Rèn & Công Cụ</button>
+        <button id="btn-open-skills" class="mmo-btn">📜 10 Kỹ Năng</button>
+        <button id="btn-open-backup" class="mmo-btn">💾 Sao Lưu</button>
+        <button id="btn-toggle-sound" class="mmo-btn">🔊 Âm Thanh</button>
       </div>
     </div>
 
-    <!-- TOUCH CONTROLS -->
-    <!-- Left Virtual Joystick -->
+    <!-- TOUCH JOYSTICK -->
     <div id="joystick-zone">
       <div id="joystick-base">
         <div id="joystick-knob"></div>
       </div>
     </div>
 
-    <!-- Right Action & Skill Controls -->
+    <!-- RIGHT ACTION & SKILL BUTTONS -->
     <div id="action-controls">
-      <!-- 5 Active Skills Row -->
       <div class="skills-row">
-        <!-- Lv 20 -->
         <div id="btn-skill-20" class="skill-btn locked" data-skill="skill_20" title="Cú Nện Chấn Động (Lv 20)">
-          <span>🔨</span>
-          <span class="skill-hotkey">1</span>
+          <span>🔨</span><span class="skill-hotkey">1</span>
           <div class="skill-cd-overlay"></div>
         </div>
-        <!-- Lv 40 -->
         <div id="btn-skill-40" class="skill-btn locked" data-skill="skill_40" title="Cuồng Nộ Địa Mẫu (Lv 40)">
-          <span>🔥</span>
-          <span class="skill-hotkey">2</span>
+          <span>🔥</span><span class="skill-hotkey">2</span>
           <div class="skill-cd-overlay"></div>
         </div>
-        <!-- Lv 60 -->
         <div id="btn-skill-60" class="skill-btn locked" data-skill="skill_60" title="Vòng Xoáy Thần Tốc (Lv 60)">
-          <span>🌪️</span>
-          <span class="skill-hotkey">3</span>
+          <span>🌪️</span><span class="skill-hotkey">3</span>
           <div class="skill-cd-overlay"></div>
         </div>
-        <!-- Lv 80 -->
         <div id="btn-skill-80" class="skill-btn locked" data-skill="skill_80" title="Khai Mỏ Thần Quang (Lv 80)">
-          <span>☄️</span>
-          <span class="skill-hotkey">4</span>
+          <span>☄️</span><span class="skill-hotkey">4</span>
           <div class="skill-cd-overlay"></div>
         </div>
-        <!-- Lv 100 -->
-        <div id="btn-skill-100" class="skill-btn locked" data-skill="skill_100" title="Thần Khai Mỏ Tối Thượng (Lv 100)">
-          <span>👑</span>
-          <span class="skill-hotkey">5</span>
+        <div id="btn-skill-100" class="skill-btn locked" data-skill="skill_100" title="Thần Khai Mỏ Titan (Lv 100)">
+          <span>👑</span><span class="skill-hotkey">5</span>
           <div class="skill-cd-overlay"></div>
         </div>
       </div>
 
-      <!-- Main Action Button -->
       <button id="btn-action" class="action-main-btn">
-        <span class="icon">⛏️</span>
-        <span>KHAI MỎ</span>
+        <span style="font-size: 26px;">⚔️</span>
+        <span>HÀNH ĐỘNG</span>
       </button>
     </div>
 
-    <!-- MODAL 1: BẢNG 10 KỸ NĂNG -->
+    <!-- MODAL 1: NHÀ MÁY CHẾ TÁC SANDSHIP (BĂNG CHUYỀN, NUNG, ÉP, ỐNG THÉP) -->
+    <div id="modal-factory" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🏭 Nhà Máy Băng Chuyền Tự Động (Sandship Factory)</h2>
+          <button class="close-btn" data-close="modal-factory">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="factory-hero">
+            <div style="font-size: 12px; color: #ffd700; font-weight: bold;">
+              BĂNG CHUYỀN QUẶNG & DÂY CHUYỀN LUYỆN KIM
+            </div>
+            <div class="conveyor-track">
+              <div style="position: absolute; left: 15px; font-size: 22px;">📦</div>
+              <div style="position: absolute; left: 95px; font-size: 22px;">🔥</div>
+              <div style="position: absolute; left: 180px; font-size: 22px;">🔨</div>
+              <div style="position: absolute; left: 260px; font-size: 22px;">🔩</div>
+            </div>
+            <div class="factory-stations">
+              <div class="station-card">
+                <div class="station-icon">⛏️</div>
+                <b>Cấp Quặng</b>
+                <div style="color: #8b949e; font-size: 10px;">Quặng thô</div>
+              </div>
+              <div class="station-card">
+                <div class="station-icon">🔥</div>
+                <b>Lò Nung</b>
+                <div style="color: #8b949e; font-size: 10px;">Đúc thỏi</div>
+              </div>
+              <div class="station-card">
+                <div class="station-icon">🔨</div>
+                <b>Máy Ép</b>
+                <div style="color: #8b949e; font-size: 10px;">Ép tấm thép</div>
+              </div>
+              <div class="station-card">
+                <div class="station-icon">⚙️</div>
+                <b>Cán Đùn</b>
+                <div style="color: #8b949e; font-size: 10px;">Ống kim loại</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="factory-actions-grid" id="factory-operations">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: NHÂN VẬT & 5 TRANG BỊ + 4 CÔNG CỤ (WARSPEAR / HEARTWOOD) -->
+    <div id="modal-char" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🛡️ Nhân Vật & Trang Bị (5 Món)</h2>
+          <button class="close-btn" data-close="modal-char">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="paperdoll-container">
+            <div class="avatar-preview-box">
+              <div class="avatar-sprite" id="avatar-icon">🧙‍♂️</div>
+              <div style="font-size: 10px; font-weight: bold; color: #ffd700;" id="char-lvl-display">Lv 1 Thợ Mỏ</div>
+            </div>
+
+            <!-- 5 Character Equipment Slots -->
+            <div class="equip-slots-grid">
+              <div class="equip-slot-item">
+                <span class="equip-slot-icon">🗡️</span>
+                <div>
+                  <div style="color: #8b949e; font-size: 10px;">Vũ Khí</div>
+                  <b id="slot-wpn-name" style="color: #ffd700;">Tay không</b>
+                </div>
+              </div>
+              <div class="equip-slot-item">
+                <span class="equip-slot-icon">👑</span>
+                <div>
+                  <div style="color: #8b949e; font-size: 10px;">Nón / Mũ</div>
+                  <b id="slot-helm-name" style="color: #ffd700;">Chưa có</b>
+                </div>
+              </div>
+              <div class="equip-slot-item">
+                <span class="equip-slot-icon">🛡️</span>
+                <div>
+                  <div style="color: #8b949e; font-size: 10px;">Áo Giáp</div>
+                  <b id="slot-arm-name" style="color: #ffd700;">Áo vải</b>
+                </div>
+              </div>
+              <div class="equip-slot-item">
+                <span class="equip-slot-icon">👖</span>
+                <div>
+                  <div style="color: #8b949e; font-size: 10px;">Quần</div>
+                  <b id="slot-pants-name" style="color: #ffd700;">Quần vải</b>
+                </div>
+              </div>
+              <div class="equip-slot-item" style="grid-column: span 2;">
+                <span class="equip-slot-icon">👢</span>
+                <div>
+                  <div style="color: #8b949e; font-size: 10px;">Giày</div>
+                  <b id="slot-boots-name" style="color: #ffd700;">Chưa có</b>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Specialized Gathering Tools (with Level) -->
+          <h3 style="font-size: 13px; color: #ffd700; margin-top: 6px;">4 CÔNG CỤ KHAI THÁC CHUYÊN DỤNG (LV 1 - 50):</h3>
+          <div class="tools-belt-grid">
+            <div class="tool-card">
+              <div style="font-size: 22px;">🪓</div>
+              <b style="color: #e0d0b0;">Rìu (Chặt gỗ)</b>
+              <div id="tool-axe-badge" style="color: #00e676; font-size: 11px; font-weight: bold;">Lv 1</div>
+            </div>
+            <div class="tool-card">
+              <div style="font-size: 22px;">⛏️</div>
+              <b style="color: #e0d0b0;">Cuốc (Đào quặng)</b>
+              <div id="tool-pick-badge" style="color: #00e676; font-size: 11px; font-weight: bold;">Lv 1</div>
+            </div>
+            <div class="tool-card">
+              <div style="font-size: 22px;">🔪</div>
+              <b style="color: #e0d0b0;">Dao (Lột da thú)</b>
+              <div id="tool-knife-badge" style="color: #00e676; font-size: 11px; font-weight: bold;">Lv 1</div>
+            </div>
+            <div class="tool-card">
+              <div style="font-size: 22px;">🌾</div>
+              <b style="color: #e0d0b0;">Liềm (Hái bông)</b>
+              <div id="tool-sickle-badge" style="color: #00e676; font-size: 11px; font-weight: bold;">Lv 1</div>
+            </div>
+          </div>
+
+          <!-- Stats Summary -->
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: #14120f; padding: 8px; border-radius: 6px; font-size: 11px; margin-top: 4px;">
+            <div>Sát thương: <b id="stat-atk" style="color: #ffd700;">10</b></div>
+            <div>Phòng thủ: <b id="stat-def" style="color: #ffd700;">0</b></div>
+            <div>Chí mạng: <b id="stat-crit" style="color: #ffd700;">5%</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 3: RÈN TRANG BỊ & NÂNG CẤP 4 CÔNG CỤ -->
+    <div id="modal-craft" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🔨 Lò Rèn & Nâng Cấp Công Cụ</h2>
+          <button class="close-btn" data-close="modal-craft">&times;</button>
+        </div>
+        <div style="padding: 10px 14px 0; display: flex; gap: 8px;">
+          <button id="tab-craft-equip" class="mmo-btn" style="flex: 1; justify-content: center; background: #ffd700; color: #17130e;">5 Món Trang Bị</button>
+          <button id="tab-craft-tools" class="mmo-btn" style="flex: 1; justify-content: center;">Nâng Cấp 4 Công Cụ</button>
+        </div>
+        <div id="crafting-items-container" class="modal-body">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 4: 10 KỸ NĂNG -->
     <div id="modal-skills" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>📜 10 Kỹ Năng Khai Thác (Lv 1 - 100)</h2>
+          <h2>📜 10 Kỹ Năng Khai Thác (Lv 10 - 100)</h2>
           <button class="close-btn" data-close="modal-skills">&times;</button>
         </div>
         <div id="skills-list" class="modal-body">
@@ -99,54 +242,36 @@
       </div>
     </div>
 
-    <!-- MODAL 2: BÀN CHẾ TẠO TRANG BỊ -->
-    <div id="modal-craft" class="modal">
+    <!-- MODAL 5: SAO LƯU & BẢO VỆ DỰ ÁN (BACKUP & RESTORE) -->
+    <div id="modal-backup" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h2>🔨 Lò Rèn & Chế Tạo Trang Bị</h2>
-          <button class="close-btn" data-close="modal-craft">&times;</button>
+          <h2>💾 Sao Lưu & Phục Hồi Toàn Bộ Tiến Trình</h2>
+          <button class="close-btn" data-close="modal-backup">&times;</button>
         </div>
-        <div style="padding: 10px 16px 0;">
-          <div class="craft-tabs">
-            <button class="craft-tab active" data-cat="all">Tất cả</button>
-            <button class="craft-tab" data-cat="weapon">Vũ khí</button>
-            <button class="craft-tab" data-cat="armor">Giáp bảo hộ</button>
-            <button class="craft-tab" data-cat="shield">Khiên</button>
-            <button class="craft-tab" data-cat="tool">Cuốc khai thác</button>
-          </div>
-        </div>
-        <div id="craft-list" class="modal-body">
-          <!-- Populated by JS -->
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL 3: TÚI ĐỒ & CHỈ SỐ -->
-    <div id="modal-inv" class="modal">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>🎒 Túi Đồ & Chỉ Số Nhân Vật</h2>
-          <button class="close-btn" data-close="modal-inv">&times;</button>
-        </div>
-        <div class="modal-body">
-          <div class="stats-grid">
-            <div class="stat-item"><span>Cấp khai thác:</span> <span id="stat-level" class="stat-val">1 / 100</span></div>
-            <div class="stat-item"><span>Máu tối đa:</span> <span id="stat-hp" class="stat-val">200</span></div>
-            <div class="stat-item"><span>Sát thương:</span> <span id="stat-atk" class="stat-val">10</span></div>
-            <div class="stat-item"><span>Phòng thủ:</span> <span id="stat-def" class="stat-val">0</span></div>
-            <div class="stat-item"><span>Sức cuốc:</span> <span id="stat-mine" class="stat-val">15</span></div>
-            <div class="stat-item"><span>Tốc độ đào:</span> <span id="stat-speed" class="stat-val">1.0x</span></div>
-            <div class="stat-item"><span>Tỉ lệ bạo kích:</span> <span id="stat-crit" class="stat-val">5%</span></div>
-            <div class="stat-item"><span>Vũ khí hiện tại:</span> <span id="stat-weapon" class="stat-val">Tay không</span></div>
+        <div class="modal-body" style="font-size: 13px; line-height: 1.5; color: #d6cdb7;">
+          <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 6px; padding: 10px;">
+            <b style="color: #ffd700;">🔒 BẢO VỆ VĨNH VIỄN VỚI GITHUB:</b>
+            <p style="margin-top: 4px; font-size: 12px;">
+              Dự án này được lưu trữ tự động trên máy chủ. Để đảm bảo <b>không bao giờ bị mất</b> kể cả khi xóa app, đổi máy hay reset điện thoại:
+              <br>👉 <b>Hãy nhấn vào biểu tượng GitHub ở phía trên cùng của đoạn chat</b> để kết nối kho lưu trữ của bạn. Toàn bộ mã nguồn và lịch sử sẽ được đồng bộ an toàn 100%!
+            </p>
           </div>
 
-          <h3 style="font-size: 14px; color: #ffd700; margin-top: 8px;">Kho Khoáng Sản & Nguyên Liệu:</h3>
-          <div id="inv-grid" class="inventory-grid">
-            <!-- Populated by JS -->
+          <div style="margin-top: 10px;">
+            <b>📋 Sao Lưu Tiến Trình Chơi Game (Save String):</b>
+            <p style="font-size: 11px; color: #8b949e; margin-bottom: 6px;">
+              Bạn có thể sao chép chuỗi mã lưu này cất vào Ghi Chú để dán lại khi cần khôi phục cấp độ và trang bị:
+            </p>
+            <textarea id="save-code-box" style="width: 100%; height: 75px; background: #0c0e14; border: 1px solid #c9a04a; border-radius: 4px; color: #00e5ff; font-family: monospace; font-size: 11px; padding: 6px; resize: none;"></textarea>
+            <div style="display: flex; gap: 8px; margin-top: 8px;">
+              <button id="btn-copy-save" class="mmo-btn" style="flex: 1; justify-content: center;">📋 Sao Chép Mã Lưu</button>
+              <button id="btn-import-save" class="mmo-btn" style="flex: 1; justify-content: center; background: #2e7d32; color: #fff; border-color: #4caf50;">📥 Nạp Lại Dữ Liệu</button>
+            </div>
           </div>
 
-          <button id="btn-reset-game" style="margin-top: 15px; padding: 8px; background: #b71c1c; color: white; border: none; border-radius: 6px; font-size: 12px; cursor: pointer;">
-            ⚠️ Xóa dữ liệu chơi lại từ đầu
+          <button id="btn-reset-game" style="margin-top: 15px; padding: 8px; background: #b71c1c; color: white; border: none; border-radius: 6px; font-size: 11px; cursor: pointer;">
+            ⚠️ Xóa sạch dữ liệu & chơi lại từ đầu
           </button>
         </div>
       </div>
